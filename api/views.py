@@ -2,15 +2,17 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, permissions, authentication
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Member
+from .models import Member, Message
 from .serializers import (
-    MessageSerializer,
+    HelloMessageSerializer,
     RegisterSerializer,
     LoginSerializer,
     MemberSerializer,
+    ChatMessageSerializer,
 )
 
 
@@ -18,7 +20,7 @@ class HelloView(APIView):
     """A simple API endpoint that returns a greeting message."""
 
     @extend_schema(
-        responses={200: MessageSerializer},
+        responses={200: HelloMessageSerializer},
         description="Get a hello world message",
     )
     def get(self, request):
@@ -26,7 +28,7 @@ class HelloView(APIView):
             "message": "Hello!",
             "timestamp": timezone.now(),
         }
-        serializer = MessageSerializer(data)
+        serializer = HelloMessageSerializer(data)
         return Response(serializer.data)
 
 
@@ -120,3 +122,38 @@ class CurrentMemberView(APIView):
 
         serializer = MemberSerializer(member)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ChatMessagesView(ListCreateAPIView):
+    """List and create messages in the group chat."""
+
+    serializer_class = ChatMessageSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        description="List chat messages in the group chat.",
+        responses={200: ChatMessageSerializer(many=True)},
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        description="Create a new chat message in the group chat.",
+        request=ChatMessageSerializer,
+        responses={201: ChatMessageSerializer},
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = Message.objects.select_related("member").order_by("created_at")
+        limit_param = self.request.query_params.get("limit")
+        if limit_param is not None:
+            try:
+                limit = int(limit_param)
+            except (TypeError, ValueError):
+                limit = None
+            if limit is not None and limit > 0:
+                queryset = queryset[:limit]
+        return queryset

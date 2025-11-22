@@ -115,6 +115,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/chat/messages/:
+    get:
+      operationId: api_chat_messages_list
+      description: List chat messages in the group chat.
+      tags:
+      - chat
+      security:
+      - tokenAuth: []
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          minimum: 1
+        required: false
+        description: Maximum number of messages to return.
+      responses:
+        '200':
+          description: List of chat messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+        '401':
+          description: Authentication credentials were not provided or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      operationId: api_chat_messages_create
+      description: Create a new chat message in the group chat.
+      tags:
+      - chat
+      security:
+      - tokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageCreateRequest'
+      responses:
+        '201':
+          description: Created chat message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication credentials were not provided or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     Message:
@@ -202,6 +265,37 @@ components:
           type: string
       required:
       - detail
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        member:
+          type: integer
+          readOnly: true
+        member_username:
+          type: string
+          readOnly: true
+        text:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - member
+      - member_username
+      - text
+      - created_at
+    ChatMessageCreateRequest:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+      - text
   securitySchemes:
     basicAuth:
       type: http

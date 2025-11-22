@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from .models import Member
+from .models import Member, Message
 
 
-class MessageSerializer(serializers.Serializer):
+class HelloMessageSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=200)
     timestamp = serializers.DateTimeField(read_only=True)
 
@@ -102,3 +102,47 @@ class LoginSerializer(serializers.Serializer):
         attrs["created_at"] = member.created_at
         attrs["token"] = token.key
         return attrs
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    member = serializers.PrimaryKeyRelatedField(read_only=True)
+    member_username = serializers.CharField(
+        source="member.username",
+        read_only=True,
+    )
+
+    class Meta:
+        model = Message
+        fields = [
+            "id",
+            "member",
+            "member_username",
+            "text",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "member",
+            "member_username",
+            "created_at",
+        ]
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        if request is None or not hasattr(request, "user"):
+            raise serializers.ValidationError(
+                "Request user is required to create a message.",
+            )
+
+        user = request.user
+        try:
+            member = user.member
+        except Member.DoesNotExist:
+            raise serializers.ValidationError(
+                "Member profile for the user does not exist.",
+            )
+
+        return Message.objects.create(
+            member=member,
+            **validated_data,
+        )
