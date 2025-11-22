@@ -259,3 +259,41 @@
   background-color: #9ca3af;
   cursor: default;
 }
+
+.profile-card {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  box-sizing: border-box;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.profile-label {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.profile-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.profile-info {
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+
+.profile-error {
+  font-size: 13px;
+  color: #b91c1c;
+  margin-bottom: 10px;
+}
