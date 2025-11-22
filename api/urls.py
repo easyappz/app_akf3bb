@@ -7,6 +7,7 @@ from .views import (
     LogoutView,
     CurrentMemberView,
     ChatMessagesView,
+    ProfileView,
 )
 
 
@@ -17,4 +18,5 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="auth-logout"),
     path("auth/me/", CurrentMemberView.as_view(), name="auth-me"),
     path("chat/messages/", ChatMessagesView.as_view(), name="chat-messages"),
+    path("profile/", ProfileView.as_view(), name="member-profile"),
 ]

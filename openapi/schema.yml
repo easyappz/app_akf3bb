@@ -115,6 +115,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/profile/:
+    get:
+      operationId: api_profile_retrieve
+      description: Get the profile of the currently authenticated Member for the profile page.
+      tags:
+      - profile
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Member profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '401':
+          description: Authentication credentials were not provided or are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/chat/messages/:
     get:
       operationId: api_chat_messages_list

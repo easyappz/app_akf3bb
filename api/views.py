@@ -124,6 +124,29 @@ class CurrentMemberView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class ProfileView(APIView):
+    """Return the profile for the current authenticated Member (profile endpoint)."""
+
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        responses={200: MemberSerializer},
+        description="Get the Member profile for the currently authenticated user (profile endpoint).",
+    )
+    def get(self, request):
+        try:
+            member = request.user.member
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MemberSerializer(member)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ChatMessagesView(ListCreateAPIView):
     """List and create messages in the group chat."""
 
